@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a0f">
+<title>⚽ Calendario Calcio</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0a0f;
+    --surface: #13131a;
+    --surface2: #1c1c27;
+    --accent: #00e5ff;
+    --accent2: #7c3aed;
+    --green: #00ff88;
+    --red: #ff3b5c;
+    --text: #e8e8f0;
+    --muted: #5a5a72;
+    --border: #2a2a3a;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Barlow', sans-serif;
+    min-height: 100dvh;
+    overflow-x: hidden;
+  }
+  body::before {
+    content: '';
+    position: fixed; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none; z-index: 0;
+  }
+  .app { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; padding: 0 0 100px; }
+
+  header { padding: 48px 24px 24px; position: relative; }
+  header::after {
+    content: '';
+    position: absolute; bottom: 0; left: 24px; right: 24px;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    opacity: 0.4;
+  }
+  .header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
+  .logo {
+    width: 40px; height: 40px;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    border-radius: 12px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 20px; flex-shrink: 0;
+  }
+  h1 {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 28px; font-weight: 800;
+    letter-spacing: 1px; text-transform: uppercase;
+    background: linear-gradient(135deg, var(--accent), var(--accent2));
+    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  }
+  .subtitle { font-size: 13px; color: var(--muted); font-weight: 300; margin-left: 52px; }
+
+  .form-card {
+    margin: 20px 16px;
+    background: var(--surface); border: 1px solid var(--border);
+    border-radius: 20px; padding: 20px;
+    display: flex; flex-direction: column; gap: 14px;
+  }
+  .field-group { display: flex; flex-direction: column; gap: 6px; }
+  label {
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 11px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase; color: var(--accent);
+  }
+  select, input[type="date"] {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; color: var(--text);
+    font-family: 'Barlow', sans-serif; font-size: 15px; padding: 12px 16px;
+    outline: none; appearance: none; -webkit-appearance: none; transition: border-color 0.2s;
+  }
+  select:focus, input[type="date"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,229,255,0.1); }
+  input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.6) sepia(1) saturate(2) hue-rotate(160deg); cursor: pointer; }
+  .date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+
+  .api-row { position: relative; }
+  .api-row input {
+    width: 100%; background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; color: var(--text);
+    font-family: monospace; font-size: 13px; padding: 12px 44px 12px 16px;
+    outline: none; transition: border-color 0.2s;
+  }
+  .api-row input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,229,255,0.1); }
+  .toggle-key {
+    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
+    background: none; border: none; cursor: pointer; color: var(--muted); font-size: 16px; padding: 4px;
+  }
+
+  .btn-generate {
+    width: 100%;
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    border: none; border-radius: 14px; color: #000;
+    font-family: 'Barlow Condensed', sans-serif;
+    font-size: 16px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
+    padding: 16px; cursor: pointer; transition: opacity 0.2s, transform 0.1s; margin-top: 4px;
+  }
+  .btn-generate:active { transform: scale(0.98); opacity: 0.85; }
+  .btn-generate:disabled { opacity: 0.4; cursor: not-allowed; }
+
+  .status-box {
+    margin: 0 16px; background: var(--surface); border: 1px solid var(--border);
+    border-radius: 16px; padding: 16px; display: none; flex-direction: column; gap: 8px;
+  }
+  .status-box.visible { display: flex; }
+  .status-line { display: flex; align-items: center; gap: 10px; font-size: 13px; animation: fadeIn 0.3s ease; }
+  .status-line .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot.loading { background: var(--accent); animation: pulse 1s infinite; }
+  .dot.ok { background: var(--green); }
+  .dot.skip { background: var(--muted); }
+  .dot.err { background: var(--red); }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+  .progress-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 4px; }
+  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); border-radius: 2px; transition: width 0.5s ease; width: 0%; }
+
+  .results-section { margin: 16px 16px 0; display: none; }
+  .results-section.visible { display: block; }
+  .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .results-title { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
+  .results-count { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: var(--green); }
+
+  .comp-block { margin-bottom: 8px; }
+  .comp-header {
+    background: linear-gradient(135deg, var(--accent2) 0%, rgba(124,58,237,0.6) 100%);
+    border-radius: 12px 12px 0 0; padding: 10px 16px;
+    display: flex; align-items: center; gap: 10px;
+  }
+  .comp-name { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #fff; }
+  .comp-count { margin-left: auto; font-size: 11px; color: rgba(255,255,255,0.6); font-weight: 500; }
+
+  .match-row {
+    display: grid; grid-template-columns: 52px 1fr auto;
+    align-items: center; padding: 10px 14px;
+    background: var(--surface); border-bottom: 1px solid var(--border); gap: 10px;
+  }
+  .match-row:last-child { border-bottom: none; border-radius: 0 0 12px 12px; }
+  .match-row:nth-child(even) { background: var(--surface2); }
+  .match-time { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: var(--accent); white-space: nowrap; }
+  .match-date-small { font-size: 10px; color: var(--muted); font-weight: 400; }
+  .match-teams { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+  .team-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
+  .team-vs { font-size: 10px; color: var(--muted); }
+  .match-day { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; color: var(--muted); text-align: right; white-space: nowrap; }
+
+  .btn-download {
+    display: flex; align-items: center; justify-content: center; gap: 10px;
+    width: calc(100% - 32px); margin: 16px 16px 0;
+    background: var(--surface); border: 1px solid var(--green); border-radius: 14px; color: var(--green);
+    font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700;
+    letter-spacing: 2px; text-transform: uppercase; padding: 16px; cursor: pointer; transition: all 0.2s;
+  }
+  .btn-download:hover { background: rgba(0,255,136,0.08); }
+  .btn-download:active { transform: scale(0.98); }
+
+  .toast {
+    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
+    background: var(--surface2); border: 1px solid var(--border);
+    border-radius: 12px; padding: 12px 20px; font-size: 13px; color: var(--text);
+    transition: transform 0.3s ease; z-index: 999; white-space: nowrap;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+  }
+  .toast.show { transform: translateX(-50%) translateY(0); }
+</style>
+</head>
+<body>
+<div class="app">
+  <header>
+    <div class="header-top">
+      <div class="logo">⚽</div>
+      <h1>Calendario Calcio</h1>
+    </div>
+    <div class="subtitle">Genera il tuo Excel con tutte le partite</div>
+  </header>
+
+  <div class="form-card">
+    <div class="field-group">
+      <label>API Key — football-data.org</label>
+      <div class="api-row">
+        <input type="password" id="apiKey" placeholder="Incolla qui la tua API Key" autocomplete="off" spellcheck="false">
+        <button class="toggle-key" onclick="toggleKey()">👁</button>
+      </div>
+    </div>
+
+    <div class="field-group">
+      <label>Competizione</label>
+      <select id="competizione">
+        <option value="TUTTO">⚽ Tutte le competizioni</option>
+        <option value="Serie A">🇮🇹 Serie A</option>
+        <option value="Champions League">🏆 Champions League</option>
+        <option value="Premier League">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</option>
+        <option value="La Liga">🇪🇸 La Liga</option>
+        <option value="Bundesliga">🇩🇪 Bundesliga</option>
+        <option value="Ligue 1">🇫🇷 Ligue 1</option>
+        <option value="Europa League">🌍 Europa League</option>
+        <option value="Eredivisie">🇳🇱 Eredivisie</option>
+      </select>
+    </div>
+
+    <div class="date-row">
+      <div class="field-group">
+        <label>Dal</label>
+        <input type="date" id="dataDa">
+      </div>
+      <div class="field-group">
+        <label>Al</label>
+        <input type="date" id="dataA">
+      </div>
+    </div>
+
+    <button class="btn-generate" id="btnGenera" onclick="genera()">⚡ Genera Excel</button>
+  </div>
+
+  <div class="status-box" id="statusBox">
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+    <div id="statusLines"></div>
+  </div>
+
+  <div class="results-section" id="resultsSection">
+    <div class="results-header">
+      <span class="results-title">Anteprima</span>
+      <span class="results-count" id="resultsCount"></span>
+    </div>
+    <div id="resultsContent"></div>
+  </div>
+
+  <button class="btn-download" id="btnDownload" style="display:none" onclick="scaricaExcel()">
+    ⬇ Scarica Excel
+  </button>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<script>
+const BACKEND = "https://calcio-backend.onrender.com";
+const GIORNI  = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato","Domenica"];
+let allData   = {};
+
+(function() {
+  const oggi  = new Date();
+  const primo = new Date(oggi.getFullYear(), oggi.getMonth(), 1);
+  const ulti  = new Date(oggi.getFullYear(), oggi.getMonth() + 1, 0);
+  document.getElementById('dataDa').value = primo.toISOString().split('T')[0];
+  document.getElementById('dataA').value  = ulti.toISOString().split('T')[0];
+  const saved = localStorage.getItem('calcio_api_key');
+  if (saved) document.getElementById('apiKey').value = saved;
+})();
+
+function toggleKey() {
+  const inp = document.getElementById('apiKey');
+  inp.type = inp.type === 'password' ? 'text' : 'password';
+}
+
+function showToast(msg, duration = 2500) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), duration);
+}
+
+function addStatus(text, type = 'loading') {
+  const div = document.createElement('div');
+  div.className = 'status-line';
+  div.id = 'sl_' + text.replace(/\s/g,'_');
+  div.innerHTML = `<div class="dot ${type}"></div><span>${text}</span>`;
+  document.getElementById('statusLines').appendChild(div);
+}
+
+function updateStatus(id, type, text) {
+  const el = document.getElementById('sl_' + id.replace(/\s/g,'_'));
+  if (!el) return;
+  el.querySelector('.dot').className = 'dot ' + type;
+  if (text) el.querySelector('span').textContent = text;
+}
+
+async function genera() {
+  const apiKey = document.getElementById('apiKey').value.trim();
+  const comp   = document.getElementById('competizione').value;
+  const dataDa = document.getElementById('dataDa').value;
+  const dataA  = document.getElementById('dataA').value;
+
+  if (!apiKey) { showToast('⚠️ Inserisci la tua API Key'); return; }
+  if (!dataDa || !dataA) { showToast('⚠️ Seleziona le date'); return; }
+  if (dataDa > dataA) { showToast('⚠️ La data inizio è dopo la data fine'); return; }
+
+  localStorage.setItem('calcio_api_key', apiKey);
+
+  const btn = document.getElementById('btnGenera');
+  btn.disabled = true; btn.textContent = '⏳ Caricamento...';
+
+  allData = {};
+  document.getElementById('statusLines').innerHTML = '';
+  document.getElementById('statusBox').classList.add('visible');
+  document.getElementById('resultsSection').classList.remove('visible');
+  document.getElementById('btnDownload').style.display = 'none';
+  document.getElementById('progressFill').style.width = '0%';
+
+  addStatus('Connessione al server...', 'loading');
+
+  try {
+    const url = `${BACKEND}/matches?apiKey=${encodeURIComponent(apiKey)}&comp=${encodeURIComponent(comp)}&dataDa=${dataDa}&dataA=${dataA}`;
+    const res = await fetch(url);
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      updateStatus('Connessione al server...', 'err', '❌ ' + (err.error || 'Errore server'));
+      btn.disabled = false; btn.textContent = '⚡ Genera Excel';
+      return;
+    }
+
+    const data = await res.json();
+    updateStatus('Connessione al server...', 'ok', '✅ Dati ricevuti');
+    document.getElementById('progressFill').style.width = '50%';
+
+    const competizioni = Object.keys(data);
+    if (competizioni.length === 0) {
+      addStatus('Nessuna partita trovata per questo periodo', 'skip');
+      btn.disabled = false; btn.textContent = '⚡ Genera Excel';
+      return;
+    }
+
+    competizioni.forEach(nome => {
+      const rows = data[nome].map(m => {
+        const utc = new Date(m.utcDate);
+        const it  = new Date(utc.toLocaleString('en-US', {timeZone: 'Europe/Rome'}));
+        return {
+          data:       it.toLocaleDateString('it-IT'),
+          giorno:     GIORNI[it.getDay() === 0 ? 6 : it.getDay() - 1],
+          orario:     it.toTimeString().slice(0,5),
+          casa:       m.homeTeam.name,
+          ospite:     m.awayTeam.name,
+          giornata:   m.matchday || '',
+          pronostico: '',
+          _ts: it.getTime(),
+        };
+      }).sort((a,b) => a._ts - b._ts);
+      allData[nome] = rows;
+      addStatus(`${nome} — ${rows.length} partite`, 'ok');
+    });
+
+    document.getElementById('progressFill').style.width = '100%';
+    renderPreview();
+    document.getElementById('btnDownload').style.display = 'flex';
+    showToast(`✅ ${competizioni.length} competizioni trovate!`);
+
+  } catch(e) {
+    updateStatus('Connessione al server...', 'err', '❌ Errore di rete — riprova tra poco');
+    showToast('⚠️ Il server potrebbe essere in avvio (30 sec)', 4000);
+  }
+
+  btn.disabled = false; btn.textContent = '⚡ Genera Excel';
+}
+
+function renderPreview() {
+  const content = document.getElementById('resultsContent');
+  content.innerHTML = '';
+  let totalPartite = 0;
+
+  for (const [nome, rows] of Object.entries(allData)) {
+    totalPartite += rows.length;
+    const block = document.createElement('div');
+    block.className = 'comp-block';
+    let html = `<div class="comp-header"><span class="comp-name">${nome}</span><span class="comp-count">${rows.length} partite</span></div>`;
+    rows.forEach(r => {
+      html += `<div class="match-row">
+        <div><div class="match-time">${r.orario}</div><div class="match-date-small">${r.data}</div></div>
+        <div class="match-teams"><div class="team-name">${r.casa}</div><div class="team-vs">vs</div><div class="team-name">${r.ospite}</div></div>
+        <div class="match-day">${r.giornata ? 'G'+r.giornata : ''}</div>
+      </div>`;
+    });
+    block.innerHTML = html;
+    content.appendChild(block);
+  }
+
+  document.getElementById('resultsCount').textContent = totalPartite + ' partite';
+  document.getElementById('resultsSection').classList.add('visible');
+}
+
+function scaricaExcel() {
+  const COLS = ["Data","Giorno","Orario","Squadra Casa","Squadra Ospite","Giornata","Pronostico"];
+  const colWidths = [{wch:12},{wch:12},{wch:9},{wch:28},{wch:28},{wch:10},{wch:20}];
+  const wsRows = []; const merges = []; let rowIdx = 0;
+
+  for (const [nome, rows] of Object.entries(allData)) {
+    wsRows.push([nome.toUpperCase(),'','','','','','']);
+    merges.push({ s:{r:rowIdx,c:0}, e:{r:rowIdx,c:6} });
+    rowIdx++;
+    wsRows.push([...COLS]); rowIdx++;
+    rows.forEach(r => { wsRows.push([r.data,r.giorno,r.orario,r.casa,r.ospite,r.giornata,r.pronostico]); rowIdx++; });
+  }
+
+  const ws = XLSX.utils.aoa_to_sheet(wsRows);
+  ws['!cols'] = colWidths; ws['!merges'] = merges;
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, "Partite");
+
+  const dataDa = document.getElementById('dataDa').value;
+  const dataA  = document.getElementById('dataA').value;
+  const comp   = document.getElementById('competizione').value;
+  XLSX.writeFile(wb, `${comp.replace(/ /g,'_')}_${dataDa}_${dataA}.xlsx`);
+  showToast('✅ File Excel scaricato!');
+}
+</script>
+</body>
+</html>

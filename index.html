@@ -6,410 +6,332 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-<meta name="theme-color" content="#0a0a0f">
+<meta name="theme-color" content="#0d1117">
 <link rel="manifest" href="manifest.json">
 <link rel="apple-touch-icon" href="icon.png">
 <title>⚽ Calendario Calcio</title>
-<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 <style>
   :root {
-    --bg: #0a0a0f;
-    --surface: #13131a;
-    --surface2: #1c1c27;
-    --accent: #00e5ff;
-    --accent2: #7c3aed;
-    --green: #00ff88;
-    --red: #ff3b5c;
-    --text: #e8e8f0;
-    --muted: #5a5a72;
-    --border: #2a2a3a;
+    --bg:       #0d1117;
+    --sidebar:  #0d1117;
+    --card:     #161b22;
+    --card2:    #1c2128;
+    --border:   #30363d;
+    --accent:   #1f6feb;
+    --accent2:  #388bfd;
+    --green:    #3fb950;
+    --red:      #f85149;
+    --yellow:   #d29922;
+    --text:     #e6edf3;
+    --muted:    #7d8590;
+    --muted2:   #484f58;
   }
   * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: 'Barlow', sans-serif;
-    min-height: 100dvh;
-    overflow-x: hidden;
-  }
-  body::before {
-    content: '';
-    position: fixed; inset: 0;
-    background-image:
-      linear-gradient(rgba(0,229,255,0.03) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,229,255,0.03) 1px, transparent 1px);
-    background-size: 40px 40px;
-    pointer-events: none; z-index: 0;
-  }
-  .app { position: relative; z-index: 1; max-width: 480px; margin: 0 auto; padding: 0 0 100px; }
-
-  header { padding: 48px 24px 24px; position: relative; }
-  header::after {
-    content: '';
-    position: absolute; bottom: 0; left: 24px; right: 24px;
-    height: 1px;
-    background: linear-gradient(90deg, transparent, var(--accent), transparent);
-    opacity: 0.4;
-  }
-  .header-top { display: flex; align-items: center; gap: 12px; margin-bottom: 6px; }
-  .logo {
-    width: 40px; height: 40px;
-    background: linear-gradient(135deg, var(--accent2), var(--accent));
-    border-radius: 12px;
-    display: flex; align-items: center; justify-content: center;
-    font-size: 20px; flex-shrink: 0;
-  }
-  h1 {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 28px; font-weight: 800;
-    letter-spacing: 1px; text-transform: uppercase;
-    background: linear-gradient(135deg, var(--accent), var(--accent2));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
-  }
-  .subtitle { font-size: 13px; color: var(--muted); font-weight: 300; margin-left: 52px; }
-
-  .form-card {
-    margin: 20px 16px;
-    background: var(--surface); border: 1px solid var(--border);
-    border-radius: 20px; padding: 20px;
-    display: flex; flex-direction: column; gap: 14px;
-  }
-  .field-group { display: flex; flex-direction: column; gap: 6px; }
-  label {
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 11px; font-weight: 700;
-    letter-spacing: 2px; text-transform: uppercase; color: var(--accent);
-  }
-  select, input[type="date"] {
-    width: 100%; background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 12px; color: var(--text);
-    font-family: 'Barlow', sans-serif; font-size: 15px; padding: 12px 16px;
-    outline: none; appearance: none; -webkit-appearance: none; transition: border-color 0.2s;
-  }
-  select:focus, input[type="date"]:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,229,255,0.1); }
-  input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.6) sepia(1) saturate(2) hue-rotate(160deg); cursor: pointer; }
-  .date-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-
-  .api-row { position: relative; }
-  .api-row input {
-    width: 100%; background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 12px; color: var(--text);
-    font-family: monospace; font-size: 13px; padding: 12px 44px 12px 16px;
-    outline: none; transition: border-color 0.2s;
-  }
-  .api-row input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(0,229,255,0.1); }
-  .toggle-key {
-    position: absolute; right: 12px; top: 50%; transform: translateY(-50%);
-    background: none; border: none; cursor: pointer; color: var(--muted); font-size: 16px; padding: 4px;
-  }
-
-  .btn-generate {
-    width: 100%;
-    background: linear-gradient(135deg, var(--accent2), var(--accent));
-    border: none; border-radius: 14px; color: #000;
-    font-family: 'Barlow Condensed', sans-serif;
-    font-size: 16px; font-weight: 800; letter-spacing: 2px; text-transform: uppercase;
-    padding: 16px; cursor: pointer; transition: opacity 0.2s, transform 0.1s; margin-top: 4px;
-  }
-  .btn-generate:active { transform: scale(0.98); opacity: 0.85; }
-  .btn-generate:disabled { opacity: 0.4; cursor: not-allowed; }
-
-  .status-box {
-    margin: 0 16px; background: var(--surface); border: 1px solid var(--border);
-    border-radius: 16px; padding: 16px; display: none; flex-direction: column; gap: 8px;
-  }
-  .status-box.visible { display: flex; }
-  .status-line { display: flex; align-items: center; gap: 10px; font-size: 13px; animation: fadeIn 0.3s ease; }
-  .status-line .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-  .dot.loading { background: var(--accent); animation: pulse 1s infinite; }
-  .dot.ok { background: var(--green); }
-  .dot.skip { background: var(--muted); }
-  .dot.err { background: var(--red); }
+  body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; min-height: 100dvh; font-size: 14px; }
+  .layout { display: flex; min-height: 100dvh; }
+  .sidebar { width: 240px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; position: fixed; top: 0; left: 0; bottom: 0; z-index: 100; transition: transform 0.3s ease; }
+  .sidebar-brand { padding: 20px 20px 16px; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
+  .brand-icon { width: 34px; height: 34px; background: var(--accent); border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 18px; flex-shrink: 0; }
+  .brand-name { font-size: 15px; font-weight: 700; color: var(--text); letter-spacing: -0.3px; }
+  .brand-sub { font-size: 11px; color: var(--muted); font-weight: 400; }
+  .nav-section { padding: 16px 12px 8px; }
+  .nav-label { font-size: 10px; font-weight: 600; letter-spacing: 1px; text-transform: uppercase; color: var(--muted2); padding: 0 8px; margin-bottom: 6px; }
+  .nav-item { display: flex; align-items: center; gap: 10px; padding: 9px 10px; border-radius: 8px; color: var(--muted); font-size: 13px; font-weight: 500; cursor: pointer; transition: all 0.15s; text-decoration: none; }
+  .nav-item:hover { background: var(--card2); color: var(--text); }
+  .nav-item.active { background: rgba(31,111,235,0.15); color: var(--accent2); }
+  .nav-item .icon { font-size: 16px; width: 20px; text-align: center; }
+  .sidebar-footer { margin-top: auto; padding: 16px; border-top: 1px solid var(--border); }
+  .api-badge { display: flex; align-items: center; gap: 8px; background: var(--card2); border-radius: 8px; padding: 10px 12px; cursor: pointer; border: 1px solid var(--border); transition: border-color 0.2s; }
+  .api-badge:hover { border-color: var(--accent); }
+  .api-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
+  .api-dot.empty { background: var(--muted2); }
+  .api-text { font-size: 12px; color: var(--muted); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .api-edit { font-size: 11px; color: var(--accent2); font-weight: 600; white-space: nowrap; }
+  .main { margin-left: 240px; flex: 1; display: flex; flex-direction: column; min-height: 100dvh; }
+  .topbar { padding: 16px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; background: var(--bg); position: sticky; top: 0; z-index: 50; }
+  .topbar-title { font-size: 16px; font-weight: 700; }
+  .topbar-sub { font-size: 12px; color: var(--muted); margin-top: 1px; }
+  .menu-toggle { display: none; background: none; border: none; color: var(--text); font-size: 20px; cursor: pointer; padding: 4px; }
+  .content { padding: 24px; flex: 1; }
+  .stats-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; margin-bottom: 24px; }
+  .stat-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; }
+  .stat-label { font-size: 11px; color: var(--muted); font-weight: 500; margin-bottom: 6px; }
+  .stat-value { font-size: 22px; font-weight: 700; color: var(--text); }
+  .stat-value.blue { color: var(--accent2); }
+  .stat-value.green { color: var(--green); }
+  .form-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 20px; margin-bottom: 20px; }
+  .form-card-header { display: flex; align-items: center; gap: 8px; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 1px solid var(--border); }
+  .form-card-title { font-size: 14px; font-weight: 600; }
+  .form-card-icon { font-size: 16px; }
+  .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  .field { display: flex; flex-direction: column; gap: 6px; }
+  .field label { font-size: 11px; font-weight: 600; color: var(--muted); letter-spacing: 0.5px; text-transform: uppercase; }
+  select, input[type="date"], input[type="password"], input[type="text"] { background: var(--card2); border: 1px solid var(--border); border-radius: 8px; color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 500; padding: 9px 12px; outline: none; appearance: none; -webkit-appearance: none; transition: border-color 0.2s, box-shadow 0.2s; width: 100%; }
+  select:focus, input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(31,111,235,0.15); }
+  input[type="date"]::-webkit-calendar-picker-indicator { filter: invert(0.5); cursor: pointer; }
+  .input-wrap { position: relative; }
+  .input-wrap input { padding-right: 36px; }
+  .input-wrap button { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); background: none; border: none; cursor: pointer; color: var(--muted); font-size: 14px; padding: 2px; }
+  .btn-primary { width: 100%; background: var(--accent); border: none; border-radius: 8px; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 700; padding: 11px 16px; cursor: pointer; transition: background 0.2s, transform 0.1s; display: flex; align-items: center; justify-content: center; gap: 8px; margin-top: 4px; }
+  .btn-primary:hover { background: var(--accent2); }
+  .btn-primary:active { transform: scale(0.98); }
+  .btn-primary:disabled { opacity: 0.5; cursor: not-allowed; }
+  .status-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 20px; display: none; }
+  .status-card.visible { display: block; }
+  .status-card-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
+  .status-card-title { font-size: 13px; font-weight: 600; }
+  .status-pct { font-size: 12px; color: var(--accent2); font-weight: 600; }
+  .progress-track { height: 4px; background: var(--card2); border-radius: 4px; overflow: hidden; margin-bottom: 14px; }
+  .progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent), var(--accent2)); border-radius: 4px; transition: width 0.5s ease; }
+  .status-list { display: flex; flex-direction: column; gap: 6px; }
+  .status-line { display: flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); animation: fadeUp 0.25s ease; }
+  .s-dot { width: 6px; height: 6px; border-radius: 50%; flex-shrink: 0; }
+  .s-dot.loading { background: var(--accent2); animation: pulse 1s infinite; }
+  .s-dot.ok { background: var(--green); }
+  .s-dot.skip { background: var(--muted2); }
+  .s-dot.err { background: var(--red); }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-  @keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
-  .progress-bar { height: 3px; background: var(--border); border-radius: 2px; overflow: hidden; margin-top: 4px; }
-  .progress-fill { height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent)); border-radius: 2px; transition: width 0.5s ease; width: 0%; }
-
-  .results-section { margin: 16px 16px 0; display: none; }
-  .results-section.visible { display: block; }
-  .results-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 12px; }
-  .results-title { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; letter-spacing: 2px; text-transform: uppercase; color: var(--muted); }
-  .results-count { font-family: 'Barlow Condensed', sans-serif; font-size: 13px; font-weight: 700; color: var(--green); }
-
-  .comp-block { margin-bottom: 8px; }
-  .comp-header {
-    background: linear-gradient(135deg, var(--accent2) 0%, rgba(124,58,237,0.6) 100%);
-    border-radius: 12px 12px 0 0; padding: 10px 16px;
-    display: flex; align-items: center; gap: 10px;
-  }
-  .comp-name { font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 800; letter-spacing: 1px; text-transform: uppercase; color: #fff; }
-  .comp-count { margin-left: auto; font-size: 11px; color: rgba(255,255,255,0.6); font-weight: 500; }
-
-  .match-row {
-    display: grid; grid-template-columns: 52px 1fr auto;
-    align-items: center; padding: 10px 14px;
-    background: var(--surface); border-bottom: 1px solid var(--border); gap: 10px;
-  }
-  .match-row:last-child { border-bottom: none; border-radius: 0 0 12px 12px; }
-  .match-row:nth-child(even) { background: var(--surface2); }
-  .match-time { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; color: var(--accent); white-space: nowrap; }
-  .match-date-small { font-size: 10px; color: var(--muted); font-weight: 400; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+  .results-card { background: var(--card); border: 1px solid var(--border); border-radius: 12px; margin-bottom: 20px; overflow: hidden; display: none; }
+  .results-card.visible { display: block; }
+  .results-header { padding: 14px 18px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; }
+  .results-title { font-size: 13px; font-weight: 600; }
+  .results-badge { background: rgba(31,111,235,0.15); color: var(--accent2); font-size: 11px; font-weight: 700; padding: 3px 10px; border-radius: 20px; }
+  .comp-section { border-bottom: 1px solid var(--border); }
+  .comp-section:last-child { border-bottom: none; }
+  .comp-header { padding: 10px 18px; background: rgba(31,111,235,0.08); display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); }
+  .comp-name { font-size: 12px; font-weight: 700; color: var(--accent2); text-transform: uppercase; letter-spacing: 0.5px; }
+  .comp-count { margin-left: auto; font-size: 11px; color: var(--muted); }
+  .match-row { display: grid; grid-template-columns: 56px 1fr 32px; align-items: center; padding: 10px 18px; gap: 10px; border-bottom: 1px solid var(--border); transition: background 0.1s; }
+  .match-row:last-child { border-bottom: none; }
+  .match-row:hover { background: var(--card2); }
+  .match-time { font-size: 14px; font-weight: 700; color: var(--accent2); }
+  .match-date { font-size: 10px; color: var(--muted); margin-top: 1px; }
   .match-teams { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
-  .team-name { font-size: 13px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; color: var(--text); }
-  .team-vs { font-size: 10px; color: var(--muted); }
-  .match-day { font-family: 'Barlow Condensed', sans-serif; font-size: 11px; color: var(--muted); text-align: right; white-space: nowrap; }
-
-  .btn-download {
-    display: flex; align-items: center; justify-content: center; gap: 10px;
-    width: calc(100% - 32px); margin: 16px 16px 0;
-    background: var(--surface); border: 1px solid var(--green); border-radius: 14px; color: var(--green);
-    font-family: 'Barlow Condensed', sans-serif; font-size: 15px; font-weight: 700;
-    letter-spacing: 2px; text-transform: uppercase; padding: 16px; cursor: pointer; transition: all 0.2s;
-  }
-  .btn-download:hover { background: rgba(0,255,136,0.08); }
+  .team { font-size: 12px; font-weight: 500; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vs { font-size: 10px; color: var(--muted2); }
+  .match-gday { font-size: 10px; color: var(--muted2); text-align: right; }
+  .btn-download { width: 100%; background: rgba(63,185,80,0.1); border: 1px solid var(--green); border-radius: 8px; color: var(--green); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 700; padding: 12px 16px; cursor: pointer; display: none; align-items: center; justify-content: center; gap: 8px; transition: background 0.2s; margin-bottom: 20px; }
+  .btn-download:hover { background: rgba(63,185,80,0.18); }
   .btn-download:active { transform: scale(0.98); }
-
-  .toast {
-    position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%) translateY(80px);
-    background: var(--surface2); border: 1px solid var(--border);
-    border-radius: 12px; padding: 12px 20px; font-size: 13px; color: var(--text);
-    transition: transform 0.3s ease; z-index: 999; white-space: nowrap;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.4);
-  }
+  .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.7); z-index: 200; display: none; align-items: center; justify-content: center; padding: 20px; }
+  .modal-overlay.visible { display: flex; }
+  .modal { background: var(--card); border: 1px solid var(--border); border-radius: 14px; padding: 24px; width: 100%; max-width: 380px; }
+  .modal-title { font-size: 15px; font-weight: 700; margin-bottom: 6px; }
+  .modal-sub { font-size: 12px; color: var(--muted); margin-bottom: 16px; line-height: 1.5; }
+  .modal-btns { display: flex; gap: 8px; margin-top: 16px; }
+  .btn-cancel { flex: 1; background: var(--card2); border: 1px solid var(--border); border-radius: 8px; color: var(--muted); font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 600; padding: 10px; cursor: pointer; }
+  .btn-save { flex: 1; background: var(--accent); border: none; border-radius: 8px; color: #fff; font-family: 'Plus Jakarta Sans', sans-serif; font-size: 13px; font-weight: 700; padding: 10px; cursor: pointer; }
+  .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(60px); background: var(--card2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 18px; font-size: 12px; font-weight: 500; color: var(--text); transition: transform 0.3s ease; z-index: 999; white-space: nowrap; box-shadow: 0 4px 20px rgba(0,0,0,0.4); }
   .toast.show { transform: translateX(-50%) translateY(0); }
+  @media (max-width: 640px) {
+    .sidebar { transform: translateX(-100%); }
+    .sidebar.open { transform: translateX(0); }
+    .main { margin-left: 0; }
+    .menu-toggle { display: block; }
+    .stats-row { grid-template-columns: 1fr 1fr; }
+    .stats-row .stat-card:last-child { grid-column: span 2; }
+    .form-grid { grid-template-columns: 1fr; }
+    .content { padding: 16px; }
+    .topbar { padding: 12px 16px; }
+  }
+  .overlay-bg { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.5); z-index: 99; }
+  .overlay-bg.visible { display: block; }
 </style>
 </head>
 <body>
-<div class="app">
-  <header>
-    <div class="header-top">
-      <div class="logo">⚽</div>
-      <h1>Calendario Calcio</h1>
+<div class="overlay-bg" id="overlayBg" onclick="closeSidebar()"></div>
+<div class="layout">
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="brand-icon">⚽</div>
+      <div><div class="brand-name">CalcioApp</div><div class="brand-sub">Calendario Partite</div></div>
     </div>
-    <div class="subtitle">Genera il tuo Excel con tutte le partite</div>
-  </header>
-
-  <div class="form-card">
-    <div class="field-group">
-      <label>API Key — football-data.org</label>
-      <div class="api-row">
-        <input type="password" id="apiKey" placeholder="Incolla qui la tua API Key" autocomplete="off" spellcheck="false">
-        <button class="toggle-key" onclick="toggleKey()">👁</button>
+    <div class="nav-section">
+      <div class="nav-label">Menu</div>
+      <a class="nav-item active"><span class="icon">📅</span> Calendario</a>
+      <a class="nav-item" onclick="openApiModal()"><span class="icon">🔑</span> API Key</a>
+    </div>
+    <div class="sidebar-footer">
+      <div class="api-badge" onclick="openApiModal()">
+        <div class="api-dot" id="apiDot"></div>
+        <span class="api-text" id="apiText">Nessuna API Key</span>
+        <span class="api-edit">Modifica</span>
       </div>
     </div>
-
-    <div class="field-group">
-      <label>Competizione</label>
-      <select id="competizione">
-        <option value="TUTTO">⚽ Tutte le competizioni</option>
-        <option value="Serie A">🇮🇹 Serie A</option>
-        <option value="Champions League">🏆 Champions League</option>
-        <option value="Premier League">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</option>
-        <option value="La Liga">🇪🇸 La Liga</option>
-        <option value="Bundesliga">🇩🇪 Bundesliga</option>
-        <option value="Ligue 1">🇫🇷 Ligue 1</option>
-        <option value="Europa League">🌍 Europa League</option>
-        <option value="Eredivisie">🇳🇱 Eredivisie</option>
-      </select>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <div><div class="topbar-title">Calendario Partite</div><div class="topbar-sub">Genera il tuo file Excel con le partite</div></div>
+      <button class="menu-toggle" onclick="toggleSidebar()">☰</button>
     </div>
-
-    <div class="date-row">
-      <div class="field-group">
-        <label>Dal</label>
-        <input type="date" id="dataDa">
+    <div class="content">
+      <div class="stats-row">
+        <div class="stat-card"><div class="stat-label">Competizioni</div><div class="stat-value blue" id="statComp">—</div></div>
+        <div class="stat-card"><div class="stat-label">Partite</div><div class="stat-value" id="statMatch">—</div></div>
+        <div class="stat-card"><div class="stat-label">Stato</div><div class="stat-value green" id="statStatus">Pronto</div></div>
       </div>
-      <div class="field-group">
-        <label>Al</label>
-        <input type="date" id="dataA">
+      <div class="form-card">
+        <div class="form-card-header"><span class="form-card-icon">🔍</span><span class="form-card-title">Parametri di ricerca</span></div>
+        <div style="display:flex;flex-direction:column;gap:12px;">
+          <div class="field">
+            <label>Competizione</label>
+            <select id="competizione">
+              <option value="TUTTO">⚽ Tutte le competizioni</option>
+              <option value="Serie A">🇮🇹 Serie A</option>
+              <option value="Champions League">🏆 Champions League</option>
+              <option value="Premier League">🏴󠁧󠁢󠁥󠁮󠁧󠁿 Premier League</option>
+              <option value="La Liga">🇪🇸 La Liga</option>
+              <option value="Bundesliga">🇩🇪 Bundesliga</option>
+              <option value="Ligue 1">🇫🇷 Ligue 1</option>
+              <option value="Europa League">🌍 Europa League</option>
+              <option value="Eredivisie">🇳🇱 Eredivisie</option>
+            </select>
+          </div>
+          <div class="form-grid">
+            <div class="field"><label>Dal</label><input type="date" id="dataDa"></div>
+            <div class="field"><label>Al</label><input type="date" id="dataA"></div>
+          </div>
+          <button class="btn-primary" id="btnGenera" onclick="genera()">⚡ Genera Excel</button>
+        </div>
+      </div>
+      <div class="status-card" id="statusCard">
+        <div class="status-card-header"><span class="status-card-title">Caricamento in corso</span><span class="status-pct" id="statusPct">0%</span></div>
+        <div class="progress-track"><div class="progress-fill" id="progressFill"></div></div>
+        <div class="status-list" id="statusLines"></div>
+      </div>
+      <button class="btn-download" id="btnDownload" onclick="scaricaExcel()">⬇ Scarica file Excel</button>
+      <div class="results-card" id="resultsCard">
+        <div class="results-header"><span class="results-title">Anteprima partite</span><span class="results-badge" id="resultsCount">0 partite</span></div>
+        <div id="resultsContent"></div>
       </div>
     </div>
-
-    <button class="btn-generate" id="btnGenera" onclick="genera()">⚡ Genera Excel</button>
   </div>
-
-  <div class="status-box" id="statusBox">
-    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
-    <div id="statusLines"></div>
-  </div>
-
-  <div class="results-section" id="resultsSection">
-    <div class="results-header">
-      <span class="results-title">Anteprima</span>
-      <span class="results-count" id="resultsCount"></span>
-    </div>
-    <div id="resultsContent"></div>
-  </div>
-
-  <button class="btn-download" id="btnDownload" style="display:none" onclick="scaricaExcel()">
-    ⬇ Scarica Excel
-  </button>
 </div>
-
+<div class="modal-overlay" id="apiModal">
+  <div class="modal">
+    <div class="modal-title">🔑 API Key</div>
+    <div class="modal-sub">Inserisci la tua API Key di football-data.org. Viene salvata solo sul tuo dispositivo.</div>
+    <div class="field"><label>API Key</label><div class="input-wrap"><input type="password" id="apiKeyInput" placeholder="Es: a1b2c3d4e5f6..."><button onclick="toggleKey()">👁</button></div></div>
+    <div class="modal-btns"><button class="btn-cancel" onclick="closeApiModal()">Annulla</button><button class="btn-save" onclick="saveApiKey()">Salva</button></div>
+  </div>
+</div>
 <div class="toast" id="toast"></div>
-
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <script>
 const BACKEND = "https://calcio-backend.onrender.com";
 const GIORNI  = ["Lunedì","Martedì","Mercoledì","Giovedì","Venerdì","Sabato","Domenica"];
 let allData   = {};
-
 (function() {
   const oggi  = new Date();
   const primo = new Date(oggi.getFullYear(), oggi.getMonth(), 1);
   const ulti  = new Date(oggi.getFullYear(), oggi.getMonth() + 1, 0);
   document.getElementById('dataDa').value = primo.toISOString().split('T')[0];
   document.getElementById('dataA').value  = ulti.toISOString().split('T')[0];
-  const saved = localStorage.getItem('calcio_api_key');
-  if (saved) document.getElementById('apiKey').value = saved;
+  updateApiStatus();
 })();
-
-function toggleKey() {
-  const inp = document.getElementById('apiKey');
-  inp.type = inp.type === 'password' ? 'text' : 'password';
+function updateApiStatus() {
+  const key = localStorage.getItem('calcio_api_key');
+  const dot  = document.getElementById('apiDot');
+  const text = document.getElementById('apiText');
+  if (key) { dot.className = 'api-dot'; text.textContent = key.slice(0,8) + '••••••••'; }
+  else { dot.className = 'api-dot empty'; text.textContent = 'Nessuna API Key'; }
 }
-
-function showToast(msg, duration = 2500) {
-  const t = document.getElementById('toast');
-  t.textContent = msg; t.classList.add('show');
-  setTimeout(() => t.classList.remove('show'), duration);
-}
-
-function addStatus(text, type = 'loading') {
-  const div = document.createElement('div');
-  div.className = 'status-line';
-  div.id = 'sl_' + text.replace(/\s/g,'_');
-  div.innerHTML = `<div class="dot ${type}"></div><span>${text}</span>`;
-  document.getElementById('statusLines').appendChild(div);
-}
-
-function updateStatus(id, type, text) {
-  const el = document.getElementById('sl_' + id.replace(/\s/g,'_'));
-  if (!el) return;
-  el.querySelector('.dot').className = 'dot ' + type;
-  if (text) el.querySelector('span').textContent = text;
-}
-
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlayBg').classList.toggle('visible'); }
+function closeSidebar() { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlayBg').classList.remove('visible'); }
+function openApiModal() { const key = localStorage.getItem('calcio_api_key'); if (key) document.getElementById('apiKeyInput').value = key; document.getElementById('apiModal').classList.add('visible'); closeSidebar(); }
+function closeApiModal() { document.getElementById('apiModal').classList.remove('visible'); }
+function saveApiKey() { const val = document.getElementById('apiKeyInput').value.trim(); if (!val) { showToast('⚠️ Inserisci una API Key valida'); return; } localStorage.setItem('calcio_api_key', val); updateApiStatus(); closeApiModal(); showToast('✅ API Key salvata'); }
+function toggleKey() { const inp = document.getElementById('apiKeyInput'); inp.type = inp.type === 'password' ? 'text' : 'password'; }
+function showToast(msg, duration = 2500) { const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show'); setTimeout(() => t.classList.remove('show'), duration); }
+function setProgress(pct) { document.getElementById('progressFill').style.width = pct + '%'; document.getElementById('statusPct').textContent = pct + '%'; }
+function addStatus(text, type = 'loading') { const div = document.createElement('div'); div.className = 'status-line'; div.id = 'sl_' + text.replace(/\W/g,'_'); div.innerHTML = `<div class="s-dot ${type}"></div><span>${text}</span>`; document.getElementById('statusLines').appendChild(div); }
+function updateStatus(id, type, text) { const el = document.getElementById('sl_' + id.replace(/\W/g,'_')); if (!el) return; el.querySelector('.s-dot').className = 's-dot ' + type; if (text) el.querySelector('span').textContent = text; }
 async function genera() {
-  const apiKey = document.getElementById('apiKey').value.trim();
+  const apiKey = localStorage.getItem('calcio_api_key');
   const comp   = document.getElementById('competizione').value;
   const dataDa = document.getElementById('dataDa').value;
   const dataA  = document.getElementById('dataA').value;
-
-  if (!apiKey) { showToast('⚠️ Inserisci la tua API Key'); return; }
+  if (!apiKey) { openApiModal(); showToast('⚠️ Prima inserisci la tua API Key'); return; }
   if (!dataDa || !dataA) { showToast('⚠️ Seleziona le date'); return; }
   if (dataDa > dataA) { showToast('⚠️ La data inizio è dopo la data fine'); return; }
-
-  localStorage.setItem('calcio_api_key', apiKey);
-
   const btn = document.getElementById('btnGenera');
   btn.disabled = true; btn.textContent = '⏳ Caricamento...';
-
   allData = {};
   document.getElementById('statusLines').innerHTML = '';
-  document.getElementById('statusBox').classList.add('visible');
-  document.getElementById('resultsSection').classList.remove('visible');
+  document.getElementById('statusCard').classList.add('visible');
+  document.getElementById('resultsCard').classList.remove('visible');
   document.getElementById('btnDownload').style.display = 'none';
-  document.getElementById('progressFill').style.width = '0%';
-
+  document.getElementById('statComp').textContent = '—';
+  document.getElementById('statMatch').textContent = '—';
+  document.getElementById('statStatus').textContent = 'Caricamento...';
+  document.getElementById('statStatus').style.color = 'var(--yellow)';
+  setProgress(0);
   addStatus('Connessione al server...', 'loading');
-
   try {
     const url = `${BACKEND}/matches?apiKey=${encodeURIComponent(apiKey)}&comp=${encodeURIComponent(comp)}&dataDa=${dataDa}&dataA=${dataA}`;
     const res = await fetch(url);
-
-    if (!res.ok) {
-      const err = await res.json().catch(() => ({}));
-      updateStatus('Connessione al server...', 'err', '❌ ' + (err.error || 'Errore server'));
-      btn.disabled = false; btn.textContent = '⚡ Genera Excel';
-      return;
-    }
-
+    if (!res.ok) { const err = await res.json().catch(() => ({})); updateStatus('Connessione al server...', 'err', '❌ ' + (err.error || 'Errore server')); document.getElementById('statStatus').textContent = 'Errore'; document.getElementById('statStatus').style.color = 'var(--red)'; btn.disabled = false; btn.textContent = '⚡ Genera Excel'; return; }
     const data = await res.json();
     updateStatus('Connessione al server...', 'ok', '✅ Dati ricevuti');
-    document.getElementById('progressFill').style.width = '50%';
-
+    setProgress(50);
     const competizioni = Object.keys(data);
-    if (competizioni.length === 0) {
-      addStatus('Nessuna partita trovata per questo periodo', 'skip');
-      btn.disabled = false; btn.textContent = '⚡ Genera Excel';
-      return;
-    }
-
-    competizioni.forEach(nome => {
+    if (competizioni.length === 0) { addStatus('Nessuna partita trovata per questo periodo', 'skip'); document.getElementById('statStatus').textContent = 'Vuoto'; document.getElementById('statStatus').style.color = 'var(--muted)'; btn.disabled = false; btn.textContent = '⚡ Genera Excel'; return; }
+    let totalPartite = 0;
+    competizioni.forEach((nome) => {
       const rows = data[nome].map(m => {
         const utc = new Date(m.utcDate);
         const it  = new Date(utc.toLocaleString('en-US', {timeZone: 'Europe/Rome'}));
-        return {
-          data:       it.toLocaleDateString('it-IT'),
-          giorno:     GIORNI[it.getDay() === 0 ? 6 : it.getDay() - 1],
-          orario:     it.toTimeString().slice(0,5),
-          casa:       m.homeTeam.name,
-          ospite:     m.awayTeam.name,
-          giornata:   m.matchday || '',
-          pronostico: '',
-          _ts: it.getTime(),
-        };
+        return { data: it.toLocaleDateString('it-IT'), giorno: GIORNI[it.getDay() === 0 ? 6 : it.getDay() - 1], orario: it.toTimeString().slice(0,5), casa: m.homeTeam.name, ospite: m.awayTeam.name, giornata: m.matchday || '', pronostico: '', _ts: it.getTime() };
       }).sort((a,b) => a._ts - b._ts);
       allData[nome] = rows;
+      totalPartite += rows.length;
       addStatus(`${nome} — ${rows.length} partite`, 'ok');
     });
-
-    document.getElementById('progressFill').style.width = '100%';
-    renderPreview();
+    setProgress(100);
+    document.getElementById('statComp').textContent = competizioni.length;
+    document.getElementById('statMatch').textContent = totalPartite;
+    document.getElementById('statStatus').textContent = 'Pronto';
+    document.getElementById('statStatus').style.color = 'var(--green)';
+    renderPreview(totalPartite);
     document.getElementById('btnDownload').style.display = 'flex';
-    showToast(`✅ ${competizioni.length} competizioni trovate!`);
-
+    showToast(`✅ ${competizioni.length} competizioni, ${totalPartite} partite`);
   } catch(e) {
     updateStatus('Connessione al server...', 'err', '❌ Errore di rete — riprova tra poco');
+    document.getElementById('statStatus').textContent = 'Errore';
+    document.getElementById('statStatus').style.color = 'var(--red)';
     showToast('⚠️ Il server potrebbe essere in avvio (30 sec)', 4000);
   }
-
   btn.disabled = false; btn.textContent = '⚡ Genera Excel';
 }
-
-function renderPreview() {
+function renderPreview(total) {
   const content = document.getElementById('resultsContent');
   content.innerHTML = '';
-  let totalPartite = 0;
-
   for (const [nome, rows] of Object.entries(allData)) {
-    totalPartite += rows.length;
-    const block = document.createElement('div');
-    block.className = 'comp-block';
+    const section = document.createElement('div');
+    section.className = 'comp-section';
     let html = `<div class="comp-header"><span class="comp-name">${nome}</span><span class="comp-count">${rows.length} partite</span></div>`;
-    rows.forEach(r => {
-      html += `<div class="match-row">
-        <div><div class="match-time">${r.orario}</div><div class="match-date-small">${r.data}</div></div>
-        <div class="match-teams"><div class="team-name">${r.casa}</div><div class="team-vs">vs</div><div class="team-name">${r.ospite}</div></div>
-        <div class="match-day">${r.giornata ? 'G'+r.giornata : ''}</div>
-      </div>`;
-    });
-    block.innerHTML = html;
-    content.appendChild(block);
+    rows.forEach(r => { html += `<div class="match-row"><div><div class="match-time">${r.orario}</div><div class="match-date">${r.data}</div></div><div class="match-teams"><div class="team">${r.casa}</div><div class="vs">vs</div><div class="team">${r.ospite}</div></div><div class="match-gday">${r.giornata ? 'G'+r.giornata : ''}</div></div>`; });
+    section.innerHTML = html;
+    content.appendChild(section);
   }
-
-  document.getElementById('resultsCount').textContent = totalPartite + ' partite';
-  document.getElementById('resultsSection').classList.add('visible');
+  document.getElementById('resultsCount').textContent = total + ' partite';
+  document.getElementById('resultsCard').classList.add('visible');
 }
-
 function scaricaExcel() {
   const COLS = ["Data","Giorno","Orario","Squadra Casa","Squadra Ospite","Giornata","Pronostico"];
   const colWidths = [{wch:12},{wch:12},{wch:9},{wch:28},{wch:28},{wch:10},{wch:20}];
   const wsRows = []; const merges = []; let rowIdx = 0;
-
   for (const [nome, rows] of Object.entries(allData)) {
-    wsRows.push([nome.toUpperCase(),'','','','','','']);
-    merges.push({ s:{r:rowIdx,c:0}, e:{r:rowIdx,c:6} });
-    rowIdx++;
+    wsRows.push([nome.toUpperCase(),'','','','','','']); merges.push({ s:{r:rowIdx,c:0}, e:{r:rowIdx,c:6} }); rowIdx++;
     wsRows.push([...COLS]); rowIdx++;
     rows.forEach(r => { wsRows.push([r.data,r.giorno,r.orario,r.casa,r.ospite,r.giornata,r.pronostico]); rowIdx++; });
   }
-
   const ws = XLSX.utils.aoa_to_sheet(wsRows);
   ws['!cols'] = colWidths; ws['!merges'] = merges;
   const wb = XLSX.utils.book_new();
   XLSX.utils.book_append_sheet(wb, ws, "Partite");
-
   const dataDa = document.getElementById('dataDa').value;
   const dataA  = document.getElementById('dataA').value;
   const comp   = document.getElementById('competizione').value;
@@ -417,10 +339,6 @@ function scaricaExcel() {
   showToast('✅ File Excel scaricato!');
 }
 </script>
-<script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('sw.js');
-  }
-</script>
+<script>if ('serviceWorker' in navigator) { navigator.serviceWorker.register('sw.js'); }</script>
 </body>
 </html>
